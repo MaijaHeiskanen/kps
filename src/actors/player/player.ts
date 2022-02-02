@@ -1,4 +1,5 @@
 import { Actor, CollisionGroupManager, CollisionType, Color, Input, Physics, vec, Vector } from 'excalibur';
+import { normalizeAndScale } from '../../helpers/normalize-and-scale';
 import { Resources } from '../../resources';
 import { BasePlayer } from '../base-player/base-player';
 import { Bot } from '../bot/bot';
@@ -22,27 +23,34 @@ export class Player extends BasePlayer {
     onPreUpdate(engine: ex.Engine, delta: number) {
         super.onPreUpdate(engine, delta);
 
+        let newX: number = 0;
+        let newY: number = 0;
+
         // Reset velocity
         if (this.state !== 'lost') {
-            this.vel.x = 0;
-            this.vel.y = 0;
+            newX = 0;
+            newY = 0;
         }
 
         // Player input
         if (engine.input.keyboard.isHeld(Input.Keys.Left)) {
-            this.vel.x = -250;
+            newX = -1;
         }
 
         if (engine.input.keyboard.isHeld(Input.Keys.Right)) {
-            this.vel.x = 250;
+            newX = 1;
         }
 
         if (engine.input.keyboard.isHeld(Input.Keys.Up)) {
-            this.vel.y = -250;
+            newY = -1;
         }
 
         if (engine.input.keyboard.isHeld(Input.Keys.Down)) {
-            this.vel.y = 250;
+            newY = 1;
         }
+
+        const normalizedVector = normalizeAndScale(newX, newY, 250);
+        this.vel.x = normalizedVector.x;
+        this.vel.y = normalizedVector.y;
     }
 }

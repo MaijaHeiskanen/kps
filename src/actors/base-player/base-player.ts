@@ -165,7 +165,6 @@ export class BasePlayer extends Actor {
         ) {
             this.immutableSpriteChangedDatetime = new Date();
             this.color = shallowEqual(this.color, Color.White) ? Color.LightGray : Color.White;
-            console.log(this.color, Color.White, Color.LightGray);
         }
     }
 }
