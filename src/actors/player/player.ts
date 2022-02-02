@@ -49,7 +49,7 @@ export class Player extends BasePlayer {
             newY = 1;
         }
 
-        const normalizedVector = normalizeAndScale(newX, newY, 250);
+        const normalizedVector = normalizeAndScale(newX, newY, 350);
         this.vel.x = normalizedVector.x;
         this.vel.y = normalizedVector.y;
     }

@@ -3,6 +3,7 @@ import { Resources } from '../../resources';
 import { BasePlayer } from '../base-player/base-player';
 
 export class Bot extends BasePlayer {
+    private movementSpeed = 200;
     constructor(startPosition: Vector) {
         super({
             pos: startPosition,
@@ -30,19 +31,19 @@ export class Bot extends BasePlayer {
     public patrol() {
         this.actions.clearActions();
         this.actions.repeatForever((ctx) => {
-            ctx.moveTo(100, 300, 120)
+            ctx.moveTo(100, 300, this.movementSpeed)
                 .delay(1)
-                .moveTo(500, 500, 120)
+                .moveTo(500, 500, this.movementSpeed)
                 .delay(1)
-                .moveTo(800, 500, 120)
+                .moveTo(800, 500, this.movementSpeed)
                 .delay(1)
-                .moveTo(1300, 200, 120)
+                .moveTo(1300, 200, this.movementSpeed)
                 .delay(1)
-                .moveTo(1200, 700, 120)
+                .moveTo(1200, 700, this.movementSpeed)
                 .delay(1)
-                .moveTo(900, 900, 120)
+                .moveTo(900, 900, this.movementSpeed)
                 .delay(1)
-                .moveTo(600, 800, 120);
+                .moveTo(600, 800, this.movementSpeed);
         });
     }
 }
