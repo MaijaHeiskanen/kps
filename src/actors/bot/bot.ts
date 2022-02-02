@@ -3,9 +3,9 @@ import { Resources } from '../../resources';
 import { BasePlayer } from '../base-player/base-player';
 
 export class Bot extends BasePlayer {
-    constructor() {
+    constructor(startPosition: Vector) {
         super({
-            pos: vec(700, 700),
+            pos: startPosition,
         });
     }
 
@@ -30,7 +30,19 @@ export class Bot extends BasePlayer {
     public patrol() {
         this.actions.clearActions();
         this.actions.repeatForever((ctx) => {
-            ctx.moveTo(800, 800, 120).delay(1).moveTo(500, 500, 120).delay(1).moveTo(800, 500, 120);
+            ctx.moveTo(100, 300, 120)
+                .delay(1)
+                .moveTo(500, 500, 120)
+                .delay(1)
+                .moveTo(800, 500, 120)
+                .delay(1)
+                .moveTo(1300, 200, 120)
+                .delay(1)
+                .moveTo(1200, 700, 120)
+                .delay(1)
+                .moveTo(900, 900, 120)
+                .delay(1)
+                .moveTo(600, 800, 120);
         });
     }
 }
