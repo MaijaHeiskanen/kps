@@ -33,6 +33,10 @@ class Game extends Engine {
 
         return super.start(loader);
     }
+
+    onPreUpdate(engine: Engine, delta: number) {
+        console.log(this.player.getScore());
+    }
 }
 
 const game = new Game();

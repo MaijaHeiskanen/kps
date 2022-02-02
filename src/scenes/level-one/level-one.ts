@@ -1,4 +1,5 @@
 import { Engine, Scene } from 'excalibur';
+import { BasePlayer } from '../../actors/base-player/base-player';
 
 /**
  * Managed scene

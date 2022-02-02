@@ -6,6 +6,8 @@ export class BasePlayer extends Actor {
     protected state: 'won' | 'lost' | 'immunity' | null = null;
     protected stateTime: number = 0;
     protected weapon: Weapon;
+    protected score: number = 0;
+    protected inFight: boolean = false;
 
     constructor(config: ActorArgs) {
         super({
@@ -19,6 +21,14 @@ export class BasePlayer extends Actor {
         });
     }
 
+    addScore() {
+        this.score = this.score + 1;
+    }
+
+    public getScore() {
+        return this.score;
+    }
+
     setCollision(value: boolean) {
         const collisionType = value ? CollisionType.Active : CollisionType.PreventCollision;
 
@@ -26,6 +36,7 @@ export class BasePlayer extends Actor {
     }
 
     setWonState(other: BasePlayer) {
+        this.setCollision(false);
         this.color = Color.Green;
         this.state = 'won';
         this.stateTime = 2000;
@@ -39,13 +50,14 @@ export class BasePlayer extends Actor {
         this.state = 'immunity';
         this.stateTime = 2000;
         this.color = Color.White;
+        // Change sprite?
     }
 
     setLostState(other: BasePlayer) {
         this.actions.clearActions();
         this.setCollision(false);
         this.state = 'lost';
-        this.stateTime = 2000;
+        this.stateTime = 1000;
         this.color = Color.Red;
         // Change sprite?
         // Sound effect?
@@ -56,17 +68,6 @@ export class BasePlayer extends Actor {
         const x = ownPosition.x - opponentPosition.x;
         const y = ownPosition.y - opponentPosition.y;
         const force = new Vector(x, y).normalize();
-
-        // const xPositive = x >= 0;
-        // const yPositive = y >= 0;
-        // const absoluteX = Math.abs(x);
-        // const absoluteY = Math.abs(y);
-        // const vectorLength = Math.sqrt(absoluteX * absoluteX + absoluteY * absoluteY);
-        // const normalizedX = (absoluteX / vectorLength) * targetVectorLength;
-        // const normalizedY = (absoluteY / vectorLength) * targetVectorLength;
-        // const newX = xPositive ? normalizedX : -normalizedX;
-        // const newY = yPositive ? normalizedY : -normalizedY;
-        // const pushForce = new Vector(newX, newY);
 
         this.vel.x = force.x * targetVectorLength;
         this.vel.y = force.y * targetVectorLength;
@@ -113,20 +114,27 @@ export class BasePlayer extends Actor {
 
     onInitialize() {
         this.on('postcollision', (evt) => this.onPostCollision(evt));
+        this.on('collisionend', (evt) => this.onCollisionEnd(evt));
     }
 
     onPostCollision(evt: ex.PostCollisionEvent) {
         const other = evt.other;
 
-        if (other instanceof BasePlayer) {
+        if (!this.inFight && other instanceof BasePlayer) {
+            this.inFight = true;
             const fightResult = this.onFight(other);
 
             if (fightResult === 1) {
                 this.setWonState(other);
+                this.addScore();
             } else if (fightResult === -1) {
                 this.setLostState(other);
             }
         }
+    }
+
+    onCollisionEnd(evt: ex.CollisionEndEvent) {
+        this.inFight = false;
     }
 
     onPreUpdate(engine: ex.Engine, delta: number) {
