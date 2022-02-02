@@ -6,7 +6,7 @@ import sword from './images/sword.png';
  * and holds available assets for the game.
  */
 const Resources = {
-    Sword: new ImageSource(sword)
-}
+    Sword: new ImageSource(sword),
+};
 
-export { Resources }
+export { Resources };

@@ -1,36 +1,43 @@
-import { Engine, Loader, DisplayMode } from 'excalibur';
+import { Engine, Loader, DisplayMode, Physics, Vector } from 'excalibur';
 import { LevelOne } from './scenes/level-one/level-one';
 import { Player } from './actors/player/player';
 import { Resources } from './resources';
+import { Bot } from './actors/bot/bot';
 
 /**
  * Managed game class
  */
 class Game extends Engine {
-  private player: Player;
-  private levelOne: LevelOne;
+    private player: Player;
+    private bot: Bot;
+    private levelOne: LevelOne;
 
-  constructor() {
-    super({ displayMode: DisplayMode.FitScreen });
-  }
+    constructor() {
+        super({ displayMode: DisplayMode.FillScreen });
+    }
 
-  public start() {
+    public start() {
+        // Create new scene with a player
+        this.levelOne = new LevelOne();
+        this.player = new Player();
+        this.bot = new Bot();
+        this.levelOne.add(this.player);
+        this.levelOne.add(this.bot);
 
-    // Create new scene with a player
-    this.levelOne = new LevelOne();
-    this.player = new Player();
-    this.levelOne.add(this.player);
+        game.add('levelOne', this.levelOne);
 
-    game.add('levelOne', this.levelOne);
+        // Automatically load all default resources
+        const loader = new Loader(Object.values(Resources));
 
-    // Automatically load all default resources
-    const loader = new Loader(Object.values(Resources));
+        loader.playButtonText = 'Aloita peli';
 
-    return super.start(loader);
-  }
+        return super.start(loader);
+    }
 }
 
 const game = new Game();
+game.setAntialiasing(false);
+
 game.start().then(() => {
-  game.goToScene('levelOne');
+    game.goToScene('levelOne');
 });
