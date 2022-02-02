@@ -1,4 +1,5 @@
 import { Actor, ActorArgs, CollisionGroupManager, CollisionType, Color, Vector } from 'excalibur';
+import { shallowEqual } from '../../helpers/shallow-equal';
 import { Player } from '../player/player';
 import { getWeaponList } from './weapon';
 
@@ -8,6 +9,7 @@ export class BasePlayer extends Actor {
     protected weapon: Weapon;
     protected score: number = 0;
     protected inFight: boolean = false;
+    protected immutableSpriteChangedDatetime: Date = null;
 
     constructor(config: ActorArgs) {
         super({
@@ -40,6 +42,7 @@ export class BasePlayer extends Actor {
         this.color = Color.Green;
         this.state = 'won';
         this.stateTime = 2000;
+        this.immutableSpriteChangedDatetime = null;
         // Change sprite?
         // Sound effect?
     }
@@ -50,6 +53,7 @@ export class BasePlayer extends Actor {
         this.state = 'immunity';
         this.stateTime = 2000;
         this.color = Color.White;
+        this.immutableSpriteChangedDatetime = new Date();
         // Change sprite?
     }
 
@@ -59,6 +63,7 @@ export class BasePlayer extends Actor {
         this.state = 'lost';
         this.stateTime = 1000;
         this.color = Color.Red;
+        this.immutableSpriteChangedDatetime = null;
         // Change sprite?
         // Sound effect?
 
@@ -79,6 +84,7 @@ export class BasePlayer extends Actor {
         this.stateTime = 0;
         this.color = Color.Yellow;
         this.vel = new Vector(0, 0);
+        this.immutableSpriteChangedDatetime = null;
         // Change sprite?
     }
 
@@ -144,10 +150,22 @@ export class BasePlayer extends Actor {
             if (this.stateTime <= 0) {
                 if (this.state === 'lost') {
                     this.setImmunity();
+                    return;
                 } else {
                     this.setDefaultState();
+                    return;
                 }
             }
+        }
+
+        if (
+            this.state === 'immunity' &&
+            this.immutableSpriteChangedDatetime &&
+            new Date().getTime() - this.immutableSpriteChangedDatetime.getTime() > 300
+        ) {
+            this.immutableSpriteChangedDatetime = new Date();
+            this.color = shallowEqual(this.color, Color.White) ? Color.LightGray : Color.White;
+            console.log(this.color, Color.White, Color.LightGray);
         }
     }
 }
