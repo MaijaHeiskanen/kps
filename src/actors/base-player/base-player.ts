@@ -1,9 +1,11 @@
-import { Actor, ActorArgs, CollisionGroupManager, CollisionType, Color } from 'excalibur';
+import { Actor, ActorArgs, CollisionGroupManager, CollisionType, Color, Vector } from 'excalibur';
 import { Player } from '../player/player';
+import { getWeaponList } from './weapon';
 
 export class BasePlayer extends Actor {
-    private state: 'won' | 'lost' | null = null;
-    private stateTime: number = 0;
+    protected state: 'won' | 'lost' | 'immunity' | null = null;
+    protected stateTime: number = 0;
+    protected weapon: Weapon;
 
     constructor(config: ActorArgs) {
         super({
@@ -23,7 +25,7 @@ export class BasePlayer extends Actor {
         this.body.collisionType = collisionType;
     }
 
-    setWonState() {
+    setWonState(other: BasePlayer) {
         this.color = Color.Green;
         this.state = 'won';
         this.stateTime = 2000;
@@ -31,13 +33,43 @@ export class BasePlayer extends Actor {
         // Sound effect?
     }
 
-    setLostState() {
+    setImmunity() {
+        this.setDefaultState();
+        this.setCollision(false);
+        this.state = 'immunity';
+        this.stateTime = 2000;
+        this.color = Color.White;
+    }
+
+    setLostState(other: BasePlayer) {
+        this.actions.clearActions();
         this.setCollision(false);
         this.state = 'lost';
         this.stateTime = 2000;
         this.color = Color.Red;
         // Change sprite?
         // Sound effect?
+
+        const targetVectorLength = 30;
+        const opponentPosition = other.body.pos;
+        const ownPosition = this.body.pos;
+        const x = ownPosition.x - opponentPosition.x;
+        const y = ownPosition.y - opponentPosition.y;
+        const force = new Vector(x, y).normalize();
+
+        // const xPositive = x >= 0;
+        // const yPositive = y >= 0;
+        // const absoluteX = Math.abs(x);
+        // const absoluteY = Math.abs(y);
+        // const vectorLength = Math.sqrt(absoluteX * absoluteX + absoluteY * absoluteY);
+        // const normalizedX = (absoluteX / vectorLength) * targetVectorLength;
+        // const normalizedY = (absoluteY / vectorLength) * targetVectorLength;
+        // const newX = xPositive ? normalizedX : -normalizedX;
+        // const newY = yPositive ? normalizedY : -normalizedY;
+        // const pushForce = new Vector(newX, newY);
+
+        this.vel.x = force.x * targetVectorLength;
+        this.vel.y = force.y * targetVectorLength;
     }
 
     setDefaultState() {
@@ -45,8 +77,38 @@ export class BasePlayer extends Actor {
         this.state = null;
         this.stateTime = 0;
         this.color = Color.Yellow;
+        this.vel = new Vector(0, 0);
         // Change sprite?
-        // Sound effect?
+    }
+
+    setWeapon(weapon: Weapon) {
+        this.weapon = weapon;
+    }
+
+    onFight(other: BasePlayer) {
+        const ownWeapon = this.weapon;
+        const opponentWeapon = other.weapon;
+        const weaponList = getWeaponList();
+        const weaponListLength = weaponList.length;
+
+        const ownScore = weaponList.indexOf(ownWeapon) + 1;
+        const opponentScore = weaponList.indexOf(opponentWeapon) + 1;
+
+        if (ownScore === 1 && opponentScore === weaponListLength) {
+            return 1;
+        }
+
+        if (opponentScore === 1 && ownScore === weaponListLength) {
+            return -1;
+        }
+
+        if (ownScore < opponentScore) {
+            return -1;
+        }
+
+        if (ownScore > opponentScore) {
+            return 1;
+        }
     }
 
     onInitialize() {
@@ -57,10 +119,12 @@ export class BasePlayer extends Actor {
         const other = evt.other;
 
         if (other instanceof BasePlayer) {
-            if (this instanceof Player) {
-                this.setWonState();
-            } else {
-                this.setLostState();
+            const fightResult = this.onFight(other);
+
+            if (fightResult === 1) {
+                this.setWonState(other);
+            } else if (fightResult === -1) {
+                this.setLostState(other);
             }
         }
     }
@@ -70,7 +134,11 @@ export class BasePlayer extends Actor {
             this.stateTime -= delta;
 
             if (this.stateTime <= 0) {
-                this.setDefaultState();
+                if (this.state === 'lost') {
+                    this.setImmunity();
+                } else {
+                    this.setDefaultState();
+                }
             }
         }
     }

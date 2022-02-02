@@ -9,23 +9,28 @@ export class Bot extends BasePlayer {
         });
     }
 
+    setDefaultState() {
+        this.setCollision(true);
+        this.state = null;
+        this.stateTime = 0;
+        this.color = Color.Yellow;
+        this.vel = new Vector(0, 0);
+        // Change sprite?
+
+        this.patrol();
+    }
+
     onInitialize() {
+        this.setWeapon('scissors');
         this.patrol();
 
         super.onInitialize();
     }
 
     public patrol() {
-        // clear existing queue
         this.actions.clearActions();
-        // guard a choke point
-        // move to 100, 100 and take 1.2s
-        // wait for 3s
-        // move back to 0, 100 and take 1.2s
-        // wait for 3s
-        // repeat
         this.actions.repeatForever((ctx) => {
-            ctx.moveTo(800, 800, 120).delay(1).moveTo(700, 700, 120).delay(1);
+            ctx.moveTo(800, 800, 120).delay(1).moveTo(500, 500, 120).delay(1).moveTo(800, 500, 120);
         });
     }
 }
