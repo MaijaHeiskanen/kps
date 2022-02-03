@@ -31,7 +31,7 @@ export class Bot extends BasePlayer {
     public patrol() {
         this.actions.clearActions();
         this.actions.repeatForever((ctx) => {
-            ctx.moveTo(100, 300, this.movementSpeed)
+            ctx.moveTo(100, 650, this.movementSpeed)
                 .delay(1)
                 .moveTo(500, 500, this.movementSpeed)
                 .delay(1)
@@ -40,6 +40,8 @@ export class Bot extends BasePlayer {
                 .moveTo(1300, 200, this.movementSpeed)
                 .delay(1)
                 .moveTo(1200, 700, this.movementSpeed)
+                .delay(1)
+                .moveTo(1400, 800, this.movementSpeed)
                 .delay(1)
                 .moveTo(900, 900, this.movementSpeed)
                 .delay(1)
