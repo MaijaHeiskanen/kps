@@ -1,12 +1,13 @@
-import { Actor, ActorArgs, CollisionGroupManager, CollisionType, Color, Vector } from 'excalibur';
+import { Actor, ActorArgs, CollisionGroupManager, CollisionType, Color, GraphicsGroup, vec, Vector } from 'excalibur';
 import { shallowEqual } from '../../helpers/shallow-equal';
-import { Player } from '../player/player';
+import { Resources } from '../../resources';
 import { getWeaponList } from './weapon';
 
 export class BasePlayer extends Actor {
     protected state: 'won' | 'lost' | 'immunity' | null = null;
     protected stateTime: number = 0;
     protected weapon: Weapon;
+    protected weaponChangeCooldown: number = 0;
     protected score: number = 0;
     protected inFight: boolean = false;
     protected immutableSpriteChangedDatetime: Date = null;
@@ -14,8 +15,7 @@ export class BasePlayer extends Actor {
     constructor(config: ActorArgs) {
         super({
             name: 'BasePlayer',
-            width: 100,
-            height: 100,
+            radius: 60,
             color: Color.Yellow,
             collisionType: CollisionType.Active,
             collisionGroup: CollisionGroupManager.groupByName('player'),
@@ -88,8 +88,42 @@ export class BasePlayer extends Actor {
         // Change sprite?
     }
 
+    setWeaponNext() {
+        const ownWeapon = this.weapon;
+        const weaponList = getWeaponList();
+        const weaponListLength = weaponList.length;
+        const idx = weaponList.indexOf(ownWeapon);
+        const isLastWeaponInTheList = idx === weaponListLength - 1;
+
+        if (isLastWeaponInTheList) {
+            this.setWeapon(weaponList[0]);
+        } else {
+            this.setWeapon(weaponList[idx + 1]);
+        }
+    }
+
     setWeapon(weapon: Weapon) {
+        if (this.weaponChangeCooldown > 0) {
+            return;
+        }
+
+        this.weaponChangeCooldown = 2000;
         this.weapon = weapon;
+
+        const group = new GraphicsGroup({
+            members: [
+                {
+                    graphic: this.graphics.getGraphic('circle'),
+                    pos: vec(0, 0),
+                },
+                {
+                    graphic: this.graphics.getGraphic(weapon),
+                    pos: vec(40, 40),
+                },
+            ],
+        });
+
+        this.graphics.use(group);
     }
 
     onFight(other: BasePlayer) {
@@ -118,9 +152,68 @@ export class BasePlayer extends Actor {
         }
     }
 
+    initGraphichs() {
+        const circleSprite = Resources.Circle.toSprite();
+        circleSprite.width = 120;
+        circleSprite.height = 120;
+        this.graphics.add('circle', circleSprite);
+
+        const scissorsSprite = Resources.Scissors.toSprite();
+        scissorsSprite.width = 40;
+        scissorsSprite.height = 40;
+        this.graphics.add('scissors', scissorsSprite);
+
+        const rockSprite = Resources.Rock.toSprite();
+        rockSprite.width = 40;
+        rockSprite.height = 40;
+        this.graphics.add('rock', rockSprite);
+
+        const paperSprite = Resources.Paper.toSprite();
+        paperSprite.width = 40;
+        paperSprite.height = 40;
+        this.graphics.add('paper', paperSprite);
+
+        // const runSpriteSheet = SpriteSheet.fromImageSource({
+        //     image: Resources.PlayerRunTest,
+        //     grid: {
+        //         rows: 1,
+        //         columns: 21,
+        //         spriteWidth: 96,
+        //         spriteHeight: 96,
+        //     },
+        // });
+
+        // const runAnimation = Animation.fromSpriteSheet(runSpriteSheet, range(1, 10), 80);
+
+        // this.graphics.add('test', runAnimation);
+
+        // const group = new GraphicsGroup({
+        //     members: [
+        //         {
+        //             graphic: runAnimation,
+        //             pos: vec(12, 12),
+        //         },
+        //         {
+        //             graphic: circleSprite,
+
+        //             pos: vec(0, 0),
+        //         },
+        //         {
+        //             graphic: scissorsSprite,
+        //             pos: vec(40, -50),
+        //         },
+        //     ],
+        // });
+
+        // this.graphics.add('group', group);
+        // this.graphics.use(group);
+    }
+
     onInitialize() {
         this.on('postcollision', (evt) => this.onPostCollision(evt));
         this.on('collisionend', (evt) => this.onCollisionEnd(evt));
+
+        this.initGraphichs();
     }
 
     onPostCollision(evt: ex.PostCollisionEvent) {
@@ -144,7 +237,7 @@ export class BasePlayer extends Actor {
     }
 
     onPreUpdate(engine: ex.Engine, delta: number) {
-        if (this.stateTime >= 0 && this.state) {
+        if (this.stateTime > 0 && this.state) {
             this.stateTime -= delta;
 
             if (this.stateTime <= 0) {
@@ -156,6 +249,10 @@ export class BasePlayer extends Actor {
                     return;
                 }
             }
+        }
+
+        if (this.weaponChangeCooldown > 0) {
+            this.weaponChangeCooldown -= delta;
         }
 
         if (

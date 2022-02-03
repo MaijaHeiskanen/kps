@@ -22,10 +22,9 @@ export class Bot extends BasePlayer {
     }
 
     onInitialize() {
+        super.onInitialize();
         this.setWeapon('scissors');
         this.patrol();
-
-        super.onInitialize();
     }
 
     public patrol() {

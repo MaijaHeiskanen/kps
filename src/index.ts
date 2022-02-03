@@ -3,6 +3,7 @@ import { LevelOne } from './scenes/level-one/level-one';
 import { Player } from './actors/player/player';
 import { Resources } from './resources';
 import { Bot } from './actors/bot/bot';
+import { DevTool } from '@excaliburjs/dev-tools';
 
 /**
  * Managed game class
@@ -62,3 +63,5 @@ game.setAntialiasing(false);
 game.start().then(() => {
     game.goToScene('levelOne');
 });
+
+// const devtool = new DevTool(game);
