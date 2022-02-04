@@ -287,7 +287,7 @@ export class BasePlayer extends Actor {
             if (fightResult === 1) {
                 this.setWonState(other);
                 this.addScore();
-            } else if (fightResult === -1) {
+            } else if (fightResult === -1 || fightResult === 0) {
                 this.setLostState(other);
             }
         }

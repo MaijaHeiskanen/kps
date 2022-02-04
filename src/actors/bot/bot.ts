@@ -1,9 +1,10 @@
-import { Actor, CollisionGroupManager, CollisionType, Color, Input, vec, Vector } from 'excalibur';
-import { Resources } from '../../resources';
+import { Color, randomIntInRange, Vector } from 'excalibur';
 import { BasePlayer } from '../base-player/base-player';
+import { getWeaponList } from '../base-player/weapon';
 
 export class Bot extends BasePlayer {
     private movementSpeed = 200;
+
     constructor(startPosition: Vector) {
         super({
             pos: startPosition,
@@ -21,30 +22,41 @@ export class Bot extends BasePlayer {
         this.patrol();
     }
 
+    getRandomWeapon() {
+        const weaponList = getWeaponList();
+        const weaponListLength = weaponList.length;
+        const newWeaponIdx = randomIntInRange(0, weaponListLength - 1);
+
+        this.setWeapon(weaponList[newWeaponIdx]);
+    }
+
+    getRandomPosition() {
+        const screen = window.screen;
+        const width = screen.width - 100;
+        const height = screen.height - 100;
+
+        return {
+            x: randomIntInRange(100, width),
+            y: randomIntInRange(100, height),
+        };
+    }
+
     onInitialize() {
         super.onInitialize();
         this.setWeapon('scissors');
+
         this.patrol();
     }
 
     public patrol() {
         this.actions.clearActions();
+
         this.actions.repeatForever((ctx) => {
-            ctx.moveTo(100, 650, this.movementSpeed)
-                .delay(1)
-                .moveTo(500, 500, this.movementSpeed)
-                .delay(1)
-                .moveTo(800, 500, this.movementSpeed)
-                .delay(1)
-                .moveTo(1300, 200, this.movementSpeed)
-                .delay(1)
-                .moveTo(1200, 700, this.movementSpeed)
-                .delay(1)
-                .moveTo(1400, 800, this.movementSpeed)
-                .delay(1)
-                .moveTo(900, 900, this.movementSpeed)
-                .delay(1)
-                .moveTo(600, 800, this.movementSpeed);
+            const position = this.getRandomPosition();
+
+            ctx.moveTo(position.x, position.y, this.movementSpeed);
+
+            this.getRandomWeapon();
         });
     }
 }
