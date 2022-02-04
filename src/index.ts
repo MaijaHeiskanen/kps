@@ -31,7 +31,7 @@ class Game extends Engine {
         this.input.gamepads.on('connect', this.connectGamepad);
 
         this.levelOne = new LevelOne();
-        this.bots = [new Bot(vec(100, 300)), new Bot(vec(-200, 0)), new Bot(vec(-500, -300))];
+        this.bots = []; // [new Bot(vec(100, 300)), new Bot(vec(-200, 0)), new Bot(vec(-500, -300))];
 
         for (let i = 0, len = this.players.length; i < len; i++) {
             this.levelOne.add(this.players[i]);
@@ -58,7 +58,7 @@ class Game extends Engine {
 }
 
 const game = new Game();
-game.setAntialiasing(false);
+game.setAntialiasing(true);
 
 game.start().then(() => {
     game.goToScene('levelOne');

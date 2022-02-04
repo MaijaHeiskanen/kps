@@ -5,12 +5,14 @@ import runImageSrc from './images/player-run.png';
 import circle from './images/circle.png';
 import rock from './images/rock.png';
 import paper from './images/paper.png';
+import player from './images/player.png';
 
 /**
  * Default global resource dictionary. This gets loaded immediately
  * and holds available assets for the game.
  */
 const Resources = {
+    Player: new ImageSource(player),
     Sword: new ImageSource(sword),
     Rock: new ImageSource(rock),
     Scissors: new ImageSource(scissors),
