@@ -13,6 +13,7 @@ import {
     vec,
     Vector,
 } from 'excalibur';
+import { normalizeAndScale } from '../../helpers/normalize-and-scale';
 import { shallowEqual } from '../../helpers/shallow-equal';
 import { Resources } from '../../resources';
 import { getWeaponList } from './weapon';
@@ -268,6 +269,12 @@ export class BasePlayer extends Actor {
         this.circle = 'circle';
 
         this.changeAnimation();
+    }
+
+    normalizeAndSetVelocity(velocity: Vector, length: number = 350) {
+        const normalizedVector = normalizeAndScale(velocity.x, velocity.y, length);
+        this.vel.x = normalizedVector.x;
+        this.vel.y = normalizedVector.y;
     }
 
     onInitialize() {

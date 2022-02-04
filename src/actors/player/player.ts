@@ -6,6 +6,8 @@ import { BasePlayer } from '../base-player/base-player';
 export class Player extends BasePlayer {
     private gamepad: Gamepad;
     private controlStyle: ControlType = 'gamepad'; // Change to 'keyboard' to control with keyboard
+    private dashTime: number = 0;
+    private dashCooldown: number = 0;
 
     constructor(gamepad: Gamepad) {
         super({
@@ -25,6 +27,14 @@ export class Player extends BasePlayer {
 
     onPreUpdate(engine: ex.Engine, delta: number) {
         super.onPreUpdate(engine, delta);
+
+        if (this.dashCooldown > 0) {
+            this.dashCooldown -= delta;
+        }
+
+        if (this.dashTime > 0) {
+            this.dashTime -= delta;
+        }
 
         const isLost = this.state === 'lost';
 
@@ -60,15 +70,19 @@ export class Player extends BasePlayer {
             const gamepad = this.gamepad;
             newX = gamepad.getAxes(Input.Axes.LeftStickX);
             newY = gamepad.getAxes(Input.Axes.LeftStickY);
-            const changeWeapon = gamepad.getButton(Input.Buttons.Face1);
+            const changeWeapon = gamepad.getButton(Input.Buttons.Face2);
+            const dashButtonActive = Boolean(gamepad.getButton(Input.Buttons.Face1));
+
+            if (this.dashCooldown <= 0 && dashButtonActive) {
+                this.dashTime = 1000;
+                this.dashCooldown = 3000;
+            }
 
             if (changeWeapon) {
                 this.setWeaponNext();
             }
         }
 
-        const normalizedVector = normalizeAndScale(newX, newY, 350);
-        this.vel.x = normalizedVector.x;
-        this.vel.y = normalizedVector.y;
+        this.normalizeAndSetVelocity(vec(newX, newY), this.dashTime > 0 ? 500 : undefined);
     }
 }
